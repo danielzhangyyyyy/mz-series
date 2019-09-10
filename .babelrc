@@ -1,0 +1,27 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "modules": false
+      }
+    ],
+    "stage-3"
+  ],
+  "plugins": [
+    [
+      "component",
+      {
+        "libraryName": "mz-series"
+      }
+    ],
+    [
+      "import",
+      {
+        "libraryName": "ant-design-vue",
+        "libraryDirectory": "es",
+        "style": "css"
+      }
+    ]
+  ]
+}
