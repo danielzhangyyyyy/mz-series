@@ -7,13 +7,16 @@
       v-if="fixedLeftColumns.length>0"
     >
       <div ref="mFixedHeaderContainer" class="mFixedHeaderContainer">
-        <table class="mFixedHeader" :style="{width: fixedWidth+'px'}">
+        <table
+          class="mFixedHeader"
+          :style="{width: columns.length>4?fixedWidth+'px':Math.floor(100/columns.length)*fixedLeftColumns.length+'%'}"
+        >
           <thead>
             <tr>
               <th
                 v-for="(item, index) in fixedLeftColumns"
                 :key="index"
-                :style="{width:item.width+'px', textAlign: item.align}"
+                :style="{width:columns.length>4?item.width+'px':Math.floor(100/columns.length)+'%', textAlign: item.align}"
               >
                 <div>{{item.title}}</div>
               </th>
@@ -26,13 +29,16 @@
         class="mFixedContentContainer"
         @scroll="handleScrollContentFixed"
       >
-        <table class="mFixedContent oddEvenRows" :style="{width: fixedWidth+'px'}">
+        <table
+          class="mFixedContent oddEvenRows"
+          :style="{width: columns.length>4?fixedWidth+'px':Math.floor(100/columns.length)*fixedLeftColumns.length+'%'}"
+        >
           <tbody>
             <tr v-for="(item, index) in dataSource" :key="index">
               <td
                 v-for="(element, cIndex) in fixedLeftColumns"
                 :key="cIndex"
-                :style="{width:element.width+'px', textAlign: element.align}"
+                :style="{width:columns.length>4?element.width+'px':Math.floor(100/columns.length)+'%', textAlign: element.align}"
               >
                 <span
                   v-if="item[element.dataIndex]!='undefined'&&!element.scopedSlots"
@@ -54,13 +60,16 @@
     </div>
     <div class="mTableContainer">
       <div ref="mTableHeaderContainer" class="mTableHeaderContainer" @scroll="handleScrollHeader">
-        <table class="mTableHeader" :style="{width: scroll.x+'px'}">
+        <table
+          class="mTableHeader"
+          :style="{width: columns.length>4?scroll.x+'px':Math.floor(100/columns.length)*columns.length+'%'}"
+        >
           <thead>
             <tr>
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                :style="{width:item.width+'px', textAlign: item.align}"
+                :style="{width:columns.length>4?item.width+'px':Math.floor(100/columns.length)+'%', textAlign: item.align}"
               >
                 <div>{{item.title}}</div>
               </th>
@@ -75,13 +84,16 @@
         @scroll="handleScrollContent"
         v-if="dataSource.length"
       >
-        <table class="mTableContent oddEvenRows" :style="{width: scroll.x+'px'}">
+        <table
+          class="mTableContent oddEvenRows"
+          :style="{width: columns.length>4?scroll.x+'px':Math.floor(100/columns.length)*columns.length+'%'}"
+        >
           <tbody>
             <tr v-for="(item, index) in dataSource" :key="index">
               <td
                 v-for="(element, cIndex) in columns"
                 :key="cIndex"
-                :style="{width:element.width+'px', textAlign: element.align}"
+                :style="{width:columns.length>4?element.width+'px':Math.floor(100/columns.length)+'%', textAlign: element.align}"
               >
                 <span
                   v-if="item[element.dataIndex]!='undefined'&&!element.scopedSlots"
@@ -123,6 +135,8 @@ export default {
   },
   watch: {
     dataSource() {
+      if (this.$refs.mTableHeaderContainer)
+        this.$refs.mTableHeaderContainer.scrollLeft = 0;
       this.totalInfo =
         this.dataSource.length < 2000
           ? this.dataSource.length == 1
@@ -153,15 +167,20 @@ export default {
       }
     },
     handleScrollHeader(e) {
-      this.$refs.mTableContentContainer.scrollLeft = e.path[0].scrollLeft;
+      this.$refs.mTableContentContainer
+        ? (this.$refs.mTableContentContainer.scrollLeft = e.path[0].scrollLeft)
+        : "";
       this.isScrollLeft = e.path[0].scrollLeft;
     },
     handleScrollContent(e) {
       this.$refs.mTableHeaderContainer.scrollLeft = e.path[0].scrollLeft;
-      this.$refs.mFixedContentContainer.scrollTop = e.path[0].scrollTop;
+      this.fixedLeftColumns.length > 0
+        ? (this.$refs.mFixedContentContainer.scrollTop = e.path[0].scrollTop)
+        : "";
       this.isScrollLeft = e.path[0].scrollLeft;
     },
     handleScrollContentFixed(e) {
+      // console.log(e);
       this.$refs.mTableContentContainer.scrollTop = e.path[0].scrollTop;
     }
   }
@@ -186,6 +205,8 @@ export default {
       tr {
         th {
           height: inherit;
+          // line-height: 40px;
+          // padding: 0 8px 0 8px;
           padding: 8px 8px;
           &:last-child {
             border-right: none;
@@ -201,20 +222,27 @@ export default {
       border-left: none;
       tr {
         border-bottom: 1px solid #e8e8e8;
+        // line-height: 37px;
         &:last-child {
           border-bottom: none;
         }
         td {
+          // display: inline-block;
+          // word-wrap: break-word;
+          // line-height: 37px;
+          // height: 37px;
           padding: 8px 8px;
         }
       }
     }
   }
 }
+
 .mFixedContainerShadow {
   box-shadow: 6px 0px 5px -5px #e8e8e8;
   border-right: 1px solid #e8e8e8;
 }
+
 .mFixedContainer {
   border: 1px solid #e8e8e8;
   border-right: none;
@@ -232,10 +260,15 @@ export default {
       tr {
         th {
           height: inherit;
+          // line-height: 40px;
+          // padding: 0 8px 0 8px;
           padding: 8px 8px;
           &:last-child {
             border-right: none;
           }
+          /* span {
+            padding: 0 8px 0 8px;
+          } */
         }
       }
     }
@@ -248,22 +281,37 @@ export default {
       tr {
         border-bottom: 1px solid #e8e8e8;
         border-left: none;
+        // line-height: 37px;
         &:last-child {
           border-bottom: none;
         }
         td {
+          // display: inline-block;
+          // word-wrap: break-word;
+          // line-height: 37px;
+          // height: 37px;
           padding: 8px 8px;
         }
       }
     }
   }
 }
+
 .mContainer td {
   max-width: 1px;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: pre;
   overflow: hidden;
 }
+
+// .mContainer td:hover {
+//   max-width: 3000px;
+//   overflow: visible;
+//   position: relative;
+//   z-index: 99999999;
+//   //  opacity: 1;
+// }
+
 .m-table-placeholder {
   position: relative;
   padding: 16px 16px;
@@ -273,6 +321,7 @@ export default {
   color: rgba(0, 0, 0, 0.45);
   z-index: 1;
 }
+
 .mContainerLoading {
   background: #ffffff;
   opacity: 0.5;
@@ -284,6 +333,7 @@ export default {
   z-index: 10;
 }
 .mPagination {
+  // font-weight: bold;
   text-align: right;
 }
 .mTableHeaderContainer::-webkit-scrollbar {
@@ -325,6 +375,7 @@ export default {
   -box-shadow: inset 0 0 0px transparent;
   background: transparent;
 }
+
 .mFixedContentContainer::-webkit-scrollbar-track {
   -box-shadow: inset 0 0 0px transparent;
   border-radius: 0;
