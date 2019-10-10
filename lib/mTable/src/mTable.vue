@@ -7,16 +7,13 @@
       v-if="fixedLeftColumns.length>0"
     >
       <div ref="mFixedHeaderContainer" class="mFixedHeaderContainer">
-        <table
-          class="mFixedHeader"
-          :style="{width: columns.length>4?fixedWidth+'px':Math.floor(100/columns.length)*fixedLeftColumns.length+'%'}"
-        >
+        <table class="mFixedHeader" :style="{width: fixedWidth+'px'}">
           <thead>
             <tr>
               <th
                 v-for="(item, index) in fixedLeftColumns"
                 :key="index"
-                :style="{width:columns.length>4?item.width+'px':Math.floor(100/columns.length)+'%', textAlign: item.align}"
+                :style="{width:item.width+'px', textAlign: item.align}"
               >
                 <div>{{item.title}}</div>
               </th>
@@ -29,16 +26,13 @@
         class="mFixedContentContainer"
         @scroll="handleScrollContentFixed"
       >
-        <table
-          class="mFixedContent oddEvenRows"
-          :style="{width: columns.length>4?fixedWidth+'px':Math.floor(100/columns.length)*fixedLeftColumns.length+'%'}"
-        >
+        <table class="mFixedContent oddEvenRows" :style="{width:fixedWidth+'px'}">
           <tbody>
             <tr v-for="(item, index) in dataSource" :key="index">
               <td
                 v-for="(element, cIndex) in fixedLeftColumns"
                 :key="cIndex"
-                :style="{width:columns.length>4?element.width+'px':Math.floor(100/columns.length)+'%', textAlign: element.align}"
+                :style="{width:element.width+'px', textAlign: element.align}"
               >
                 <span
                   v-if="item[element.dataIndex]!='undefined'&&!element.scopedSlots"
@@ -60,16 +54,13 @@
     </div>
     <div class="mTableContainer">
       <div ref="mTableHeaderContainer" class="mTableHeaderContainer" @scroll="handleScrollHeader">
-        <table
-          class="mTableHeader"
-          :style="{width: columns.length>4?scroll.x+'px':Math.floor(100/columns.length)*columns.length+'%'}"
-        >
+        <table class="mTableHeader" :style="{width: scroll.x+'px'}">
           <thead>
             <tr>
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                :style="{width:columns.length>4?item.width+'px':Math.floor(100/columns.length)+'%', textAlign: item.align}"
+                :style="{width:item.width+'px', textAlign: item.align}"
               >
                 <div>{{item.title}}</div>
               </th>
@@ -84,16 +75,13 @@
         @scroll="handleScrollContent"
         v-if="dataSource.length"
       >
-        <table
-          class="mTableContent oddEvenRows"
-          :style="{width: columns.length>4?scroll.x+'px':Math.floor(100/columns.length)*columns.length+'%'}"
-        >
+        <table class="mTableContent oddEvenRows" :style="{width: scroll.x+'px'}">
           <tbody>
             <tr v-for="(item, index) in dataSource" :key="index">
               <td
                 v-for="(element, cIndex) in columns"
                 :key="cIndex"
-                :style="{width:columns.length>4?element.width+'px':Math.floor(100/columns.length)+'%', textAlign: element.align}"
+                :style="{width:element.width+'px', textAlign: element.align}"
               >
                 <span
                   v-if="item[element.dataIndex]!='undefined'&&!element.scopedSlots"
@@ -113,9 +101,15 @@
         </table>
       </div>
     </div>
-    <div class="mPagination" v-if="showPagination&&dataSource&&dataSource.length">{{totalInfo}}</div>
+    <!-- <div class="mPagination" v-if="showPagination&&dataSource">total: {{dataSource.length}} rows</div> -->
+    <div class="mPagination" v-if="showPagination&&dataSource&&dataSource.length">
+      {{dataSource.length < 2000 ?
+      dataSource.length == 1 ? `total ${dataSource.length} row` : `total ${dataSource.length} rows`
+      : this.$t("lang.messageFor2000Records")}}
+    </div>
   </div>
 </template>
+
 <script>
 import { spin } from "ant-design-vue";
 export default {
@@ -134,6 +128,36 @@ export default {
     this.getFixedLeftColums();
   },
   watch: {
+    columns: {
+      handler(val) {
+        if (val.length != 0) {
+          if (!this.$refs.mTableHeaderContainer) {
+            throw new TypeError("Cannot find table.");
+          }
+          const containerWidth = this.$refs.mTableHeaderContainer.offsetWidth;
+          let accumulatedWidth = 0;
+          for (let item of this.columns) {
+            item.width ? (accumulatedWidth += item.width) : "";
+          }
+          if (accumulatedWidth < containerWidth) {
+            const gap =
+              (containerWidth - accumulatedWidth) / this.columns.length;
+            accumulatedWidth = 0;
+            for (let i = 0; i < this.columns.length; i++) {
+              let temp = this.columns[i];
+              temp.width += gap;
+              this.$set(this.columns, i, temp);
+              accumulatedWidth += temp.width;
+            }
+            this.$set(this.scroll, "x", accumulatedWidth);
+            this.getFixedWith();
+            this.getFixedLeftColums();
+          }
+        }
+      },
+      immediate: true,
+      deep: true
+    },
     dataSource() {
       if (this.$refs.mTableHeaderContainer)
         this.$refs.mTableHeaderContainer.scrollLeft = 0;
