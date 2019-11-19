@@ -5,14 +5,15 @@
 ## Build Setup
 
 ``` bash
-# install dependencies
-npm install
+This is a vue component.
 
-# serve with hot reload at localhost:8080
-npm run dev
+A simple table used for npm test.
 
-# build for production with minification
-npm run build
+If you want to use this component, 
+
+please adding "mz-series": "^1.0.7",
+
+and run npm install
 ```
 
 For detailed explanation on how things work, consult the [docs for vue-loader](http://vuejs.github.io/vue-loader).
