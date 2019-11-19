@@ -119,7 +119,10 @@ export default {
       fixedWidth: 0,
       fixedLeftColumns: [],
       isScrollLeft: 0,
-      totalInfo: ""
+      totalInfo: "",
+      timerHandleScrollHeader: null,
+      timerHandleScrollContent: null,
+      timerHandleScrollContentFixed: null
     };
   },
   props: ["columns", "dataSource", "scroll", "loading", "showPagination"],
@@ -191,21 +194,36 @@ export default {
       }
     },
     handleScrollHeader(e) {
-      this.$refs.mTableContentContainer
-        ? (this.$refs.mTableContentContainer.scrollLeft = e.path[0].scrollLeft)
-        : "";
-      this.isScrollLeft = e.path[0].scrollLeft;
+      if (this.timerHandleScrollHeader) {
+        clearTimeout(this.timerHandleScrollHeader);
+      }
+      this.timerHandleScrollHeader = setTimeout(() => {
+        this.$refs.mTableContentContainer
+          ? (this.$refs.mTableContentContainer.scrollLeft =
+              e.path[0].scrollLeft)
+          : "";
+        this.isScrollLeft = e.path[0].scrollLeft;
+      }, 0);
     },
     handleScrollContent(e) {
-      this.$refs.mTableHeaderContainer.scrollLeft = e.path[0].scrollLeft;
-      this.fixedLeftColumns.length > 0
-        ? (this.$refs.mFixedContentContainer.scrollTop = e.path[0].scrollTop)
-        : "";
-      this.isScrollLeft = e.path[0].scrollLeft;
+      if (this.timerHandleScrollContent) {
+        clearTimeout(this.timerHandleScrollContent);
+      }
+      this.timerHandleScrollContent = setTimeout(() => {
+        this.$refs.mTableHeaderContainer.scrollLeft = e.path[0].scrollLeft;
+        this.fixedLeftColumns.length > 0
+          ? (this.$refs.mFixedContentContainer.scrollTop = e.path[0].scrollTop)
+          : "";
+        this.isScrollLeft = e.path[0].scrollLeft;
+      }, 0);
     },
     handleScrollContentFixed(e) {
-      // console.log(e);
-      this.$refs.mTableContentContainer.scrollTop = e.path[0].scrollTop;
+      if (this.timerHandleScrollContentFixed) {
+        clearTimeout(this.timerHandleScrollContentFixed);
+      }
+      this.timerHandleScrollContentFixed = setTimeout(() => {
+        this.$refs.mTableContentContainer.scrollTop = e.path[0].scrollTop;
+      }, 0);
     }
   }
 };
