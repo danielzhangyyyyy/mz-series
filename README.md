@@ -11,7 +11,7 @@ A simple table used for npm test.
 
 If you want to use this component, 
 
-please adding "mz-series": "^1.0.7",
+please adding "mz-series": "^1.0.9",
 
 and run npm install
 ```
